@@ -481,11 +481,11 @@ bool GeometricPlanningContext::solve(double timeout, unsigned int count, double&
     }
     else // attempt to solve in parallel
     {
-        ROS_WARN("Solving problem in parallel with up to %u threads", spec_.max_num_threads);
+        ROS_DEBUG("Solving problem in parallel with up to %u threads", spec_.max_num_threads);
         ompl::tools::ParallelPlan pp(simple_setup_->getProblemDefinition());
         if (count <= spec_.max_num_threads) // fewer attempts than threads
         {
-            if (planner_id_.size())
+            if (planner_id_.size()) // There is a planner configured
             {
                 for(unsigned int i = 0; i < count; ++i)
                     pp.addPlanner(configurePlanner(planner_id_, spec_.config));
@@ -511,7 +511,8 @@ bool GeometricPlanningContext::solve(double timeout, unsigned int count, double&
             result = true;
             for (int i = 0; i < n && !ptc(); ++i)
             {
-                if (planner_id_.size())
+                pp.clearPlanners();
+                if (planner_id_.size()) // There is a planner configured
                 {
                     for(unsigned int i = 0; i < spec_.max_num_threads; ++i)
                         pp.addPlanner(configurePlanner(planner_id_, spec_.config));
@@ -530,7 +531,7 @@ bool GeometricPlanningContext::solve(double timeout, unsigned int count, double&
             if (n && !ptc())
             {
                 pp.clearPlanners();
-                if (planner_id_.size())
+                if (planner_id_.size()) // There is a planner configured
                 {
                     for(unsigned int i = 0; i < spec_.max_num_threads; ++i)
                         pp.addPlanner(configurePlanner(planner_id_, spec_.config));
@@ -657,7 +658,7 @@ bool GeometricPlanningContext::setGoalConstraints(const std::vector<moveit_msgs:
         }
         else
         {
-            ROS_WARN("No constraint sampler!");
+            ROS_WARN("No constraint sampler available to sample goal constraints");
         }
     }
 
