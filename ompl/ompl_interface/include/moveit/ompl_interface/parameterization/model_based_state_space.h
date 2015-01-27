@@ -34,8 +34,8 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_OMPL_INTERFACE_PARAMETERIZATION_MODEL_BASED_STATE_SPACE_
-#define MOVEIT_OMPL_INTERFACE_PARAMETERIZATION_MODEL_BASED_STATE_SPACE_
+#ifndef MOVEIT_OMPL_INTERFACE_MODEL_BASED_STATE_SPACE_
+#define MOVEIT_OMPL_INTERFACE_MODEL_BASED_STATE_SPACE_
 
 #include <ompl/base/StateSpace.h>
 #include <moveit/robot_model/robot_model.h>
@@ -46,20 +46,15 @@
 namespace ompl_interface
 {
 
+MOVEIT_CLASS_FORWARD(ModelBasedStateSpace);
+
 typedef boost::function<bool(const ompl::base::State *from, const ompl::base::State *to, const double t, ompl::base::State *state)> InterpolationFunction;
 typedef boost::function<double(const ompl::base::State *state1, const ompl::base::State *state2)> DistanceFunction;
 
 struct ModelBasedStateSpaceSpecification
 {
   ModelBasedStateSpaceSpecification(const robot_model::RobotModelConstPtr &robot_model,
-                                    const robot_model::JointModelGroup *jmg)
-    : robot_model_(robot_model)
-    , joint_model_group_(jmg)
-  {
-  }
-
-  ModelBasedStateSpaceSpecification(const robot_model::RobotModelConstPtr &robot_model,
-                                    const std::string &group_name) 
+                                    const std::string &group_name)
     : robot_model_(robot_model)
     , joint_model_group_(robot_model_->getJointModelGroup(group_name))
   {
@@ -69,17 +64,18 @@ struct ModelBasedStateSpaceSpecification
 
   robot_model::RobotModelConstPtr robot_model_;
   const robot_model::JointModelGroup *joint_model_group_;
-  robot_model::JointBoundsVector joint_bounds_; 
+  robot_model::JointBoundsVector joint_bounds_;
 };
 
+/// Definition of an OMPL state space composed of the joints of a robot
 class ModelBasedStateSpace : public ompl::base::StateSpace
 {
 public:
-  
+
   class StateType : public ompl::base::State
   {
   public:
-    
+
     enum
       {
         VALIDITY_KNOWN = 1,
@@ -88,8 +84,8 @@ public:
         IS_START_STATE = 8,
         IS_GOAL_STATE = 16
       };
-    
-    StateType() 
+
+    StateType()
       : ompl::base::State()
       , values(NULL)
       , tag(-1)
@@ -97,19 +93,19 @@ public:
       , distance(0.0)
     {
     }
-    
+
     void markValid(double d)
     {
       distance = d;
       flags |= GOAL_DISTANCE_KNOWN;
       markValid();
     }
-    
+
     void markValid()
     {
       flags |= (VALIDITY_KNOWN | VALIDITY_TRUE);
     }
-    
+
     void markInvalid(double d)
     {
       distance = d;
@@ -187,6 +183,11 @@ public:
     distance_function_ = fun;
   }
 
+  virtual bool isMetricSpace() const
+  {
+      return false;
+  }
+
   virtual ompl::base::State* allocState() const;
   virtual void freeState(ompl::base::State *state) const;
   virtual unsigned int getDimension() const;
@@ -207,7 +208,7 @@ public:
 
   virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
 
-  
+
   const robot_model::RobotModelConstPtr& getRobotModel() const
   {
     return spec_.robot_model_;
@@ -268,7 +269,7 @@ protected:
   std::vector<const robot_model::JointModel*> joint_model_vector_;
   unsigned int variable_count_;
   size_t state_values_size_;
-  
+
   InterpolationFunction interpolation_function_;
   DistanceFunction distance_function_;
 

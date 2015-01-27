@@ -38,12 +38,12 @@
 #define MOVEIT_OMPL_INTERFACE_DETAIL_PROJECTION_EVALUATORS_
 
 #include <ompl/base/ProjectionEvaluator.h>
-#include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
+#include "moveit/ompl_interface/detail/threadsafe_state_storage.h"
 
 namespace ompl_interface
 {
 
-class ModelBasedPlanningContext;
+class OMPLPlanningContext;
 
 /** @class ProjectionEvaluatorLinkPose
     @brief */
@@ -51,7 +51,7 @@ class ProjectionEvaluatorLinkPose : public ompl::base::ProjectionEvaluator
 {
 public:
 
-  ProjectionEvaluatorLinkPose(const ModelBasedPlanningContext *pc, const std::string &link);
+  ProjectionEvaluatorLinkPose(const OMPLPlanningContext *pc, const std::string &link);
 
   virtual unsigned int getDimension() const;
   virtual void defaultCellSizes();
@@ -59,7 +59,7 @@ public:
 
 private:
 
-  const ModelBasedPlanningContext *planning_context_;
+  const OMPLPlanningContext *planning_context_;
   const robot_model::LinkModel    *link_;
   TSStateStorage                   tss_;
 };
@@ -69,7 +69,7 @@ private:
 class ProjectionEvaluatorJointValue : public ompl::base::ProjectionEvaluator
 {
 public:
-  ProjectionEvaluatorJointValue(const ModelBasedPlanningContext *pc, const std::vector<unsigned int> &variables);
+  ProjectionEvaluatorJointValue(const OMPLPlanningContext *pc, const std::vector<unsigned int> &variables);
 
   virtual unsigned int getDimension() const;
   virtual void defaultCellSizes();
@@ -77,7 +77,7 @@ public:
 
 private:
 
-  const ModelBasedPlanningContext *planning_context_;
+  const OMPLPlanningContext *planning_context_;
   std::vector<unsigned int>        variables_;
 };
 }

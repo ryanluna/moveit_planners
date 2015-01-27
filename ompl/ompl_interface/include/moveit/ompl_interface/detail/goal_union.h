@@ -34,6 +34,9 @@
 
 /* Author: Ioan Sucan */
 
+#ifndef MOVEIT_OMPL_INTERFACE_GOALMUX_
+#define MOVEIT_OMPL_INTERFACE_GOALMUX_
+
 #include <ompl/base/goals/GoalSampleableRegion.h>
 
 namespace ompl_interface
@@ -63,7 +66,7 @@ public:
 
   /** @brief Query if sampler could find a sample in the future */
   virtual bool couldSample() const;
-  
+
   /** @brief Is the goal satisfied for this state (given a distance)*/
   virtual bool isSatisfied(const ompl::base::State *st, double *distance) const;
 
@@ -75,7 +78,7 @@ public:
 
   /** @brief If there are any member lazy samplers, stop them */
   void stopSampling();
-  
+
   /** @brief Pretty print goal information*/
   virtual void print(std::ostream &out = std::cout) const;
 
@@ -86,3 +89,5 @@ protected:
 };
 
 }
+
+#endif

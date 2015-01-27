@@ -34,14 +34,16 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_OMPL_INTERFACE_PARAMETERIZATION_WORK_SPACE_POSE_MODEL_STATE_SPACE_
-#define MOVEIT_OMPL_INTERFACE_PARAMETERIZATION_WORK_SPACE_POSE_MODEL_STATE_SPACE_
+#ifndef MOVEIT_OMPL_INTERFACE_POSE_MODEL_STATE_SPACE_
+#define MOVEIT_OMPL_INTERFACE_POSE_MODEL_STATE_SPACE_
 
-#include <moveit/ompl_interface/parameterization/model_based_state_space.h>
+#include "moveit/ompl_interface/parameterization/model_based_state_space.h"
 #include <ompl/base/spaces/SE3StateSpace.h>
 
 namespace ompl_interface
 {
+
+OMPL_CLASS_FORWARD(PoseModelStateSpace);
 
 class PoseModelStateSpace : public ModelBasedStateSpace
 {
@@ -57,24 +59,24 @@ public:
         JOINTS_COMPUTED = 256,
         POSE_COMPUTED = 512
       };
-    
-    StateType() 
+
+    StateType()
       : ModelBasedStateSpace::StateType()
       , poses(NULL)
     {
       flags |= JOINTS_COMPUTED;
     }
-    
+
     bool jointsComputed() const
     {
       return flags & JOINTS_COMPUTED;
     }
-    
+
     bool poseComputed() const
     {
       return flags & POSE_COMPUTED;
     }
-    
+
     void setJointsComputed(bool value)
     {
       if (value)
@@ -82,7 +84,7 @@ public:
       else
         flags &= ~JOINTS_COMPUTED;
     }
-    
+
     void setPoseComputed(bool value)
     {
       if (value)
@@ -90,13 +92,13 @@ public:
       else
         flags &= ~POSE_COMPUTED;
     }
-    
+
     ompl::base::SE3StateSpace::StateType **poses;
   };
-  
+
   PoseModelStateSpace(const ModelBasedStateSpaceSpecification &spec);
   virtual ~PoseModelStateSpace();
-  
+
   virtual ompl::base::State* allocState() const;
   virtual void freeState(ompl::base::State *state) const;
   virtual void copyState(ompl::base::State *destination, const ompl::base::State *source) const;
@@ -105,7 +107,7 @@ public:
   virtual double getMaximumExtent() const;
 
   virtual ompl::base::StateSamplerPtr allocDefaultStateSampler() const;
-  
+
   bool computeStateFK(ompl::base::State *state) const;
   bool computeStateIK(ompl::base::State *state) const;
   bool computeStateK(ompl::base::State *state) const;
@@ -123,19 +125,19 @@ private:
 
     bool computeStateFK(StateType *full_state, unsigned int idx) const;
     bool computeStateIK(StateType *full_state, unsigned int idx) const;
-    
+
     bool operator<(const PoseComponent &o) const
     {
       return subgroup_->getName() < o.subgroup_->getName();
     }
-    
+
     const robot_model::JointModelGroup *subgroup_;
     boost::shared_ptr<kinematics::KinematicsBase> kinematics_solver_;
     std::vector<unsigned int> bijection_;
     ompl::base::StateSpacePtr state_space_;
     std::vector<std::string> fk_link_;
   };
-  
+
   std::vector<PoseComponent> poses_;
   double jump_factor_;
 };

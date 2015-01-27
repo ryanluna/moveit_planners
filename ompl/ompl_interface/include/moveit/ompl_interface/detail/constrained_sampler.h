@@ -34,16 +34,15 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_OMPL_INTERFACE_DETAIL_CONSTRAINED_SAMPLER_
-#define MOVEIT_OMPL_INTERFACE_DETAIL_CONSTRAINED_SAMPLER_
+#ifndef MOVEIT_OMPL_INTERFACE_CONSTRAINED_SAMPLER_
+#define MOVEIT_OMPL_INTERFACE_CONSTRAINED_SAMPLER_
 
 #include <ompl/base/StateSampler.h>
 #include <moveit/constraint_samplers/constraint_sampler.h>
+#include "moveit/ompl_interface/ompl_planning_context.h"
 
 namespace ompl_interface
 {
-
-class ModelBasedPlanningContext;
 
 /** @class ConstrainedSampler
  *  This class defines a sampler that tries to find a sample that satisfies the constraints*/
@@ -54,7 +53,7 @@ public:
    *  @param pg The planning group
    *  @param cs A pointer to a kinematic constraint sampler
    */
-  ConstrainedSampler(const ModelBasedPlanningContext *pc, const constraint_samplers::ConstraintSamplerPtr &cs);
+  ConstrainedSampler(const OMPLPlanningContext *pc, const constraint_samplers::ConstraintSamplerPtr &cs);
 
   /** @brief Sample a state (uniformly)*/
   virtual void sampleUniform(ompl::base::State *state);
@@ -71,7 +70,7 @@ private:
 
   bool sampleC(ompl::base::State *state);
 
-  const ModelBasedPlanningContext                  *planning_context_;
+  const OMPLPlanningContext                         *planning_context_;
   ompl::base::StateSamplerPtr                       default_;
   constraint_samplers::ConstraintSamplerPtr         constraint_sampler_;
   robot_state::RobotState                           work_state_;

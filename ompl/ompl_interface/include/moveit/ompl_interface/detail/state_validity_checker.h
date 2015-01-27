@@ -37,14 +37,14 @@
 #ifndef MOVEIT_OMPL_INTERFACE_DETAIL_STATE_VALIDITY_CHECKER_
 #define MOVEIT_OMPL_INTERFACE_DETAIL_STATE_VALIDITY_CHECKER_
 
-#include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
+#include "moveit/ompl_interface/detail/threadsafe_state_storage.h"
 #include <moveit/collision_detection/collision_common.h>
 #include <ompl/base/StateValidityChecker.h>
 
 namespace ompl_interface
 {
 
-class ModelBasedPlanningContext;
+class OMPLPlanningContext;
 
 /** @class StateValidityChecker
     @brief An interface for a OMPL state validity checker*/
@@ -52,7 +52,7 @@ class StateValidityChecker : public ompl::base::StateValidityChecker
 {
 public:
 
-  StateValidityChecker(const ModelBasedPlanningContext *planning_context);
+  StateValidityChecker(const OMPLPlanningContext *planning_context);
 
 
   virtual bool isValid(const ompl::base::State *state) const
@@ -81,7 +81,7 @@ protected:
   bool isValidWithCache(const ompl::base::State *state, bool verbose) const;
   bool isValidWithCache(const ompl::base::State *state, double &dist, bool verbose) const;
 
-  const ModelBasedPlanningContext      *planning_context_;
+  const OMPLPlanningContext            *planning_context_;
   std::string                           group_name_;
   TSStateStorage                        tss_;
   collision_detection::CollisionRequest collision_request_simple_;

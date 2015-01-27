@@ -34,14 +34,14 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/ompl_interface/detail/projection_evaluators.h>
-#include <moveit/ompl_interface/model_based_planning_context.h>
-#include <moveit/ompl_interface/parameterization/model_based_state_space.h>
+#include "moveit/ompl_interface/detail/projection_evaluators.h"
+#include "moveit/ompl_interface/ompl_planning_context.h"
+#include "moveit/ompl_interface/parameterization/model_based_state_space.h"
 
-ompl_interface::ProjectionEvaluatorLinkPose::ProjectionEvaluatorLinkPose(const ModelBasedPlanningContext *pc, const std::string &link)
+ompl_interface::ProjectionEvaluatorLinkPose::ProjectionEvaluatorLinkPose(const OMPLPlanningContext *pc, const std::string &link)
   : ompl::base::ProjectionEvaluator(pc->getOMPLStateSpace())
   , planning_context_(pc)
-  , link_(planning_context_->getJointModelGroup()->getLinkModel(link))
+  , link_(planning_context_->getCompleteInitialRobotState().getLinkModel(link))
   , tss_(planning_context_->getCompleteInitialRobotState())
 {
 }
@@ -70,7 +70,7 @@ void ompl_interface::ProjectionEvaluatorLinkPose::project(const ompl::base::Stat
   projection(2) = o.z();
 }
 
-ompl_interface::ProjectionEvaluatorJointValue::ProjectionEvaluatorJointValue(const ModelBasedPlanningContext *pc,
+ompl_interface::ProjectionEvaluatorJointValue::ProjectionEvaluatorJointValue(const OMPLPlanningContext *pc,
                                                                              const std::vector<unsigned int> &variables)
   : ompl::base::ProjectionEvaluator(pc->getOMPLStateSpace())
   , planning_context_(pc)

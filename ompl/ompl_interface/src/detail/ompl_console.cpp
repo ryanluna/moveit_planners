@@ -34,10 +34,25 @@
 
 /* Author: Ioan Sucan */
 
+#include <ros/common.h>
+#if ROS_VERSION_MINIMUM(1,11,0) // ROS Indigo or later
+
+#define OMPL_CONSOLE_LOGGER __rosconsole_define_location__loc.logger_
+#define OMPL_CONSOLE_LEVEL __rosconsole_define_location__loc.level_
+#define OMPL_CONSOLE_ENABLED __rosconsole_define_location__enabled
+
+#else // ROS Hydro or earlier
+
+#define OMPL_CONSOLE_LOGGER loc.logger_
+#define OMPL_CONSOLE_LEVEL loc.level_
+#define OMPL_CONSOLE_ENABLED enabled
+
+ #endif
+
 #include <ros/console.h>
 #include <ompl/util/Console.h>
 
-namespace ompl_inteface
+namespace ompl_interface
 {
 class OutputHandlerROS : public ompl::msg::OutputHandler
 {
@@ -54,27 +69,27 @@ public:
     case ompl::msg::LOG_INFO:
       {
         ROSCONSOLE_DEFINE_LOCATION(true, ::ros::console::levels::Info, std::string(ROSCONSOLE_ROOT_LOGGER_NAME) + ".ompl");
-        if (ROS_UNLIKELY(__rosconsole_define_location__enabled))
+        if (ROS_UNLIKELY(OMPL_CONSOLE_ENABLED))
         {
-          ::ros::console::print(NULL, __rosconsole_define_location__loc.logger_, __rosconsole_define_location__loc.level_, filename, line, "", "%s", text.c_str());
+          ::ros::console::print(NULL, OMPL_CONSOLE_LOGGER, OMPL_CONSOLE_LEVEL, filename, line, "", "%s", text.c_str());
         }
       }
       break;
     case ompl::msg::LOG_WARN:
       {
         ROSCONSOLE_DEFINE_LOCATION(true, ::ros::console::levels::Warn, std::string(ROSCONSOLE_ROOT_LOGGER_NAME) + ".ompl");
-        if (ROS_UNLIKELY(__rosconsole_define_location__enabled))
+        if (ROS_UNLIKELY(OMPL_CONSOLE_ENABLED))
         {
-          ::ros::console::print(NULL, __rosconsole_define_location__loc.logger_, __rosconsole_define_location__loc.level_, filename, line, "", "%s", text.c_str());
+          ::ros::console::print(NULL, OMPL_CONSOLE_LOGGER, OMPL_CONSOLE_LEVEL, filename, line, "", "%s", text.c_str());
         }
       }
       break;
     case ompl::msg::LOG_ERROR:
       {
         ROSCONSOLE_DEFINE_LOCATION(true, ::ros::console::levels::Error, std::string(ROSCONSOLE_ROOT_LOGGER_NAME) + ".ompl");
-        if (ROS_UNLIKELY(__rosconsole_define_location__enabled))
+        if (ROS_UNLIKELY(OMPL_CONSOLE_ENABLED))
         {
-          ::ros::console::print(NULL, __rosconsole_define_location__loc.logger_, __rosconsole_define_location__loc.level_, filename, line, "", "%s", text.c_str());
+          ::ros::console::print(NULL, OMPL_CONSOLE_LOGGER, OMPL_CONSOLE_LEVEL, filename, line, "", "%s", text.c_str());
         }
       }
       break;
@@ -82,9 +97,9 @@ public:
       // debug
       {
         ROSCONSOLE_DEFINE_LOCATION(true, ::ros::console::levels::Debug, std::string(ROSCONSOLE_ROOT_LOGGER_NAME) + ".ompl");
-        if (ROS_UNLIKELY(__rosconsole_define_location__enabled))
+        if (ROS_UNLIKELY(OMPL_CONSOLE_ENABLED))
         {
-          ::ros::console::print(NULL, __rosconsole_define_location__loc.logger_, __rosconsole_define_location__loc.level_, filename, line, "", "%s", text.c_str());
+          ::ros::console::print(NULL, OMPL_CONSOLE_LOGGER, OMPL_CONSOLE_LEVEL, filename, line, "", "%s", text.c_str());
         }
       }
       break;

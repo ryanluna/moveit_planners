@@ -44,7 +44,7 @@
 namespace ompl_interface
 {
 
-class ModelBasedPlanningContext;
+class OMPLPlanningContext;
 
 /** @class ValidConstrainedSampler
  *  This class defines a sampler that tries to find a valid sample that satisfies the specified constraints */
@@ -52,7 +52,7 @@ class ValidConstrainedSampler : public ompl::base::ValidStateSampler
 {
 public:
 
-  ValidConstrainedSampler(const ModelBasedPlanningContext *pc, const kinematic_constraints::KinematicConstraintSetPtr &ks,
+  ValidConstrainedSampler(const OMPLPlanningContext *pc, const kinematic_constraints::KinematicConstraintSetPtr &ks,
                           const constraint_samplers::ConstraintSamplerPtr &cs = constraint_samplers::ConstraintSamplerPtr());
 
   virtual bool sample(ompl::base::State *state);
@@ -61,7 +61,7 @@ public:
 
 private:
 
-  const ModelBasedPlanningContext                  *planning_context_;
+  const OMPLPlanningContext                        *planning_context_;
   kinematic_constraints::KinematicConstraintSetPtr  kinematic_constraint_set_;
   constraint_samplers::ConstraintSamplerPtr         constraint_sampler_;
   ompl::base::StateSamplerPtr                       default_sampler_;
