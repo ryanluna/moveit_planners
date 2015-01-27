@@ -33,18 +33,16 @@ catkin_package(
     moveit_ros_planning
 )
 
-include_directories(SYSTEM
-                    ${Boost_INCLUDE_DIRS})
-
 include_directories(ompl_interface/include
-                    ${catkin_INCLUDE_DIRS}
-                    ${OMPL_INCLUDE_DIRS})
+                    ${OMPL_INCLUDE_DIRS}
+                    ${Boost_INCLUDE_DIRS}
+                    ${catkin_INCLUDE_DIRS})
 
 link_directories(${OMPL_LIBRARY_DIRS})
-link_directories(${catkin_LIBRARY_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
+link_directories(${catkin_LIBRARY_DIRS})
 
 add_subdirectory(ompl_interface)
 
-install(FILES ompl_interface_plugin_description.xml
+install(FILES ompl_interface_plugin_description.xml ompl_geometric_planning_plugin_description.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

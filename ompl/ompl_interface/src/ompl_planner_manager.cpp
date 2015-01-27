@@ -42,7 +42,7 @@
 #include <dynamic_reconfigure/server.h>
 
 #include "moveit/ompl_interface/ompl_planning_context.h"
-#include "moveit_planners_ompl_interface/OMPLDynamicReconfigureConfig.h"
+#include "moveit_planners_ompl/OMPLDynamicReconfigureConfig.h"
 
 
 // For backward compatibility with older .yaml files.
@@ -69,14 +69,13 @@ public:
 
         nh_ = ros::NodeHandle(ns);
 
-        dynamic_reconfigure_server_.reset(new dynamic_reconfigure::Server<OMPLDynamicReconfigureConfig>(ros::NodeHandle(nh_, ns.empty() ? "ompl" : ns + "/ompl")));
+        dynamic_reconfigure_server_.reset(new dynamic_reconfigure::Server<moveit_planners_ompl::OMPLDynamicReconfigureConfig>(ros::NodeHandle(nh_, ns.empty() ? "ompl" : ns + "/ompl")));
         dynamic_reconfigure_server_->setCallback(boost::bind(&OMPLPlannerManager::dynamicReconfigureCallback, this, _1, _2));
 
         // Initialize planning context plugin loader
         try
         {
-                                                                                    // package,                          base_class
-            ompl_planner_loader_.reset(new pluginlib::ClassLoader<OMPLPlanningContext>("moveit_planners_ompl_interface", "ompl_interface::OMPLPlanningContext"));
+            ompl_planner_loader_.reset(new pluginlib::ClassLoader<OMPLPlanningContext>("moveit_planners_ompl", "ompl_interface::OMPLPlanningContext"));
         }
         catch(pluginlib::PluginlibException& ex)
         {
@@ -343,7 +342,7 @@ protected:
     }
 
 private:
-    void dynamicReconfigureCallback(OMPLDynamicReconfigureConfig &config, uint32_t level)
+    void dynamicReconfigureCallback(moveit_planners_ompl::OMPLDynamicReconfigureConfig &config, uint32_t level)
     {
         simplify_ = config.simplify_solutions;
         interpolate_ = config.minimum_waypoint_count > 2;
@@ -368,7 +367,7 @@ private:
     constraint_samplers::ConstraintSamplerManagerPtr constraint_sampler_manager_;
 
 
-    boost::scoped_ptr<dynamic_reconfigure::Server<OMPLDynamicReconfigureConfig> > dynamic_reconfigure_server_;
+    boost::scoped_ptr<dynamic_reconfigure::Server<moveit_planners_ompl::OMPLDynamicReconfigureConfig> > dynamic_reconfigure_server_;
     bool simplify_;
     bool interpolate_;
     unsigned int min_waypoint_count_;
