@@ -710,7 +710,7 @@ ompl::base::PlannerPtr GeometricPlanningContext::configurePlanner(const std::str
     std::map<std::string, PlannerAllocator>::const_iterator it = planner_allocators_.find(planner_name);
     // Allocating planner using planner allocator
     if (it != planner_allocators_.end())
-        return it->second(simple_setup_->getSpaceInformation(), "", params);
+        return it->second(simple_setup_->getSpaceInformation(), spec_.name, params);
 
     // No planner configured by this name
     ROS_WARN("No planner allocator found with name '%s'", planner_name.c_str());
