@@ -125,8 +125,14 @@ void GeometricPlanningContext::registerPlannerAllocator(const std::string &plann
     planner_allocators_[planner_id] = pa;
 }
 
-void GeometricPlanningContext::initialize(const PlanningContextSpecification& spec)
+ConstraintsLibraryPtr GeometricPlanningContext::getConstraintsLibrary() const
 {
+    return constraints_library_;
+}
+
+void GeometricPlanningContext::initialize(const std::string& ros_namespace, const PlanningContextSpecification& spec)
+{
+    nh_ = ros::NodeHandle(ros_namespace);
     spec_ = spec;
 
     simplify_ = spec.simplify_solution;
@@ -146,7 +152,7 @@ void GeometricPlanningContext::initialize(const PlanningContextSpecification& sp
     if (it != spec_.config.end())
         spec_.config.erase(it);
 
-    OMPLPlanningContext::initialize(spec_);
+    OMPLPlanningContext::initialize(ros_namespace, spec_);
 
     constraint_sampler_manager_ = spec_.constraint_sampler_mgr;
     if (!complete_initial_robot_state_)
@@ -192,8 +198,21 @@ void GeometricPlanningContext::initialize(const PlanningContextSpecification& sp
         path_constraints_.reset();
     }
 
+    // Library of constraints
+    constraints_library_.reset(new ConstraintsLibrary(this, constraint_sampler_manager_));
+    std::string cpath;
+    if (nh_.getParam("constraint_approximations_path", cpath))
+    {
+        constraints_library_->loadConstraintApproximations(cpath);
+        std::stringstream ss;
+        constraints_library_->printConstraintApproximations(ss);
+        ROS_INFO_STREAM(ss.str());
+    }
+
     // OMPL StateSampler
     mbss_->setStateSamplerAllocator(boost::bind(&GeometricPlanningContext::allocPathConstrainedSampler, this, _1));
+
+
 }
 
 void GeometricPlanningContext::allocateStateSpace(const ModelBasedStateSpaceSpecification& state_space_spec)
@@ -254,25 +273,22 @@ ompl::base::StateSamplerPtr GeometricPlanningContext::allocPathConstrainedSample
 
     ROS_DEBUG("%s: Allocating a new state sampler (attempts to use path constraints)", name_.c_str());
 
-    if (path_constraints_)
+    if (path_constraints_ && constraints_library_)
     {
-        /*if (spec_.constraints_library_)
+        const ConstraintApproximationPtr &ca = constraints_library_->getConstraintApproximation(request_.path_constraints);
+        if (ca)
         {
-            const ConstraintApproximationPtr &ca = spec_.constraints_library_->getConstraintApproximation(path_constraints_msg_);
-            if (ca)
+            ompl::base::StateSamplerAllocator c_ssa = ca->getStateSamplerAllocator(request_.path_constraints);
+            if (c_ssa)
             {
-                ompl::base::StateSamplerAllocator c_ssa = ca->getStateSamplerAllocator(path_constraints_msg_);
-                if (c_ssa)
+                ompl::base::StateSamplerPtr res = c_ssa(ss);
+                if (res)
                 {
-                    ompl::base::StateSamplerPtr res = c_ssa(ss);
-                    if (res)
-                    {
-                        logInform("%s: Using precomputed state sampler (approximated constraint space) for constraint '%s'", name_.c_str(), path_constraints_msg_.name.c_str());
-                        return res;
-                    }
+                    logInform("%s: Using precomputed state sampler (approximated constraint space) for constraint '%s'", name_.c_str(), request_.path_constraints.name.c_str());
+                    return res;
                 }
             }
-        }*/
+        }
 
         constraint_samplers::ConstraintSamplerPtr cs = constraint_sampler_manager_->selectSampler(getPlanningScene(), getGroupName(), path_constraints_->getAllConstraints());
         if (cs)
@@ -595,7 +611,7 @@ const robot_state::RobotState& GeometricPlanningContext::getCompleteInitialRobot
     return *complete_initial_robot_state_;
 }
 
-void GeometricPlanningContext::setCompleteInitialRobotState(const robot_state::RobotStatePtr& state)
+void GeometricPlanningContext::setCompleteInitialRobotState(const robot_state::RobotState& state)
 {
     if (!complete_initial_robot_state_)
     {
@@ -603,7 +619,7 @@ void GeometricPlanningContext::setCompleteInitialRobotState(const robot_state::R
         return;
     }
 
-    *complete_initial_robot_state_ = *(state.get());
+    *complete_initial_robot_state_ = state;
 
     // Start state
     ompl::base::ScopedState<> start_state(mbss_);

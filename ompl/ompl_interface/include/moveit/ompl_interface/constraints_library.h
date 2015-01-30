@@ -37,8 +37,9 @@
 #ifndef MOVEIT_OMPL_INTERFACE_CONSTRAINTS_LIBRARY_
 #define MOVEIT_OMPL_INTERFACE_CONSTRAINTS_LIBRARY_
 
-#include <moveit/ompl_interface/planning_context_manager.h>
+#include <moveit/ompl_interface/ompl_planning_context.h>
 #include <moveit/kinematic_constraints/kinematic_constraint.h>
+#include <moveit/constraint_samplers/constraint_sampler_manager.h>
 #include <ompl/base/StateStorage.h>
 #include <boost/function.hpp>
 #include <boost/serialization/map.hpp>
@@ -164,7 +165,7 @@ class ConstraintsLibrary
 {
 public:
 
-  ConstraintsLibrary(const PlanningContextManager &pcontext) : context_manager_(pcontext)
+  ConstraintsLibrary(OMPLPlanningContext* pcontext, const constraint_samplers::ConstraintSamplerManagerPtr& csm) : pcontext_(pcontext), constraint_sampler_manager_(csm)
   {
   }
 
@@ -194,12 +195,12 @@ public:
 
 private:
 
-  ompl::base::StateStoragePtr constructConstraintApproximation(const ModelBasedPlanningContextPtr &pcontext,
-                                                               const moveit_msgs::Constraints &constr_sampling, const moveit_msgs::Constraints &constr_hard,
+  ompl::base::StateStoragePtr constructConstraintApproximation(const moveit_msgs::Constraints &constr_sampling, const moveit_msgs::Constraints &constr_hard,
                                                                const ConstraintApproximationConstructionOptions &options,
                                                                ConstraintApproximationConstructionResults &result);
 
-  const PlanningContextManager &context_manager_;
+  OMPLPlanningContext* pcontext_;
+  constraint_samplers::ConstraintSamplerManagerPtr constraint_sampler_manager_;
   std::map<std::string, ConstraintApproximationPtr> constraint_approximations_;
 
 };

@@ -155,7 +155,7 @@ planning_interface::PlanningContextPtr OMPLPlannerManager::getPlanningContext(co
         spec.max_waypoint_distance = max_waypoint_distance_;
         spec.max_num_threads = max_num_threads_;
 
-        context->initialize(spec);
+        context->initialize(nh_.getNamespace(), spec);
 
         const moveit_msgs::WorkspaceParameters &wparams = req.workspace_parameters;
         if (wparams.min_corner.x == wparams.max_corner.x && wparams.min_corner.x == 0.0 &&

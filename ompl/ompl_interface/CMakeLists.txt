@@ -2,7 +2,7 @@ set(MOVEIT_LIB_NAME moveit_ompl_interface)
 
 add_library(${MOVEIT_LIB_NAME}
   src/ompl_planner_manager.cpp
-  #src/constraints_library.cpp
+  src/constraints_library.cpp
   src/geometric_planning_context.cpp
   src/parameterization/model_based_state_space.cpp
   src/parameterization/joint_space/joint_model_state_space.cpp
