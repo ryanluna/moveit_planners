@@ -358,27 +358,22 @@ bool GeometricPlanningContext::solve(planning_interface::MotionPlanResponse& res
         // Simplifying solution
         if (simplify_ && (timeout - plan_time) > 0)
         {
-            ROS_DEBUG("Simplifying solution...");
-            simple_setup_->simplifySolution(timeout - plan_time);
-            plan_time += simple_setup_->getLastSimplificationTime();
+            plan_time += simplifySolution(timeout - plan_time);
         }
 
         ompl::geometric::PathGeometric &pg = simple_setup_->getSolutionPath();
         // Interpolating the solution
         if (interpolate_)
         {
-            ROS_DEBUG("Interpolating solution...");
             // The maximum length of a single segment in the solution path
-            double max_segment_length;
-            if (spec_.max_waypoint_distance > 0.0)
-                max_segment_length = spec_.max_waypoint_distance;
-            else max_segment_length = simple_setup_->getStateSpace()->getMaximumExtent() / 100.0;
-
-            pg.interpolate(std::max((unsigned int)floor(0.5 + pg.length() / spec_.max_waypoint_distance), spec_.min_waypoint_count));
+            double max_segment_length = (spec_.max_waypoint_distance > 0.0 ? spec_.max_waypoint_distance : simple_setup_->getStateSpace()->getMaximumExtent() / 100.0);
+            // Computing the total number of waypoints we want in the solution path
+            unsigned int waypoint_count = std::max((unsigned int)floor(0.5 + pg.length() / max_segment_length), spec_.min_waypoint_count);
+            interpolateSolution(pg, waypoint_count);
         }
 
         ROS_DEBUG("%s: Returning successful solution with %lu states", getName().c_str(),
-                   simple_setup_->getSolutionPath().getStateCount());
+                   pg.getStateCount());
 
         res.trajectory_.reset(new robot_trajectory::RobotTrajectory(getRobotModel(), getGroupName()));
 
@@ -428,8 +423,7 @@ bool GeometricPlanningContext::solve(planning_interface::MotionPlanDetailedRespo
         // Simplifying solution
         if (simplify_ && (timeout - plan_time) > 0)
         {
-            simple_setup_->simplifySolution(timeout - plan_time);
-            double simplify_time = simple_setup_->getLastSimplificationTime();
+            double simplify_time = simplifySolution(timeout - plan_time);
 
             res.processing_time_.push_back(simplify_time);
             res.description_.push_back("simplify");
@@ -449,17 +443,20 @@ bool GeometricPlanningContext::solve(planning_interface::MotionPlanDetailedRespo
         if (interpolate_)
         {
             pg = simple_setup_->getSolutionPath();
-            ompl::time::point start_interpolate = ompl::time::now();
-            pg.interpolate(std::max((unsigned int)floor(0.5 + pg.length() / spec_.max_waypoint_distance), spec_.min_waypoint_count));
-            res.processing_time_.push_back(ompl::time::seconds(ompl::time::now() - start_interpolate));
+            // The maximum length of a single segment in the solution path
+            double max_segment_length = (spec_.max_waypoint_distance > 0.0 ? spec_.max_waypoint_distance : simple_setup_->getStateSpace()->getMaximumExtent() / 100.0);
+            // Computing the total number of waypoints we want in the solution path
+            unsigned int waypoint_count = std::max((unsigned int)floor(0.5 + pg.length() / max_segment_length), spec_.min_waypoint_count);
+            double interpolate_time = interpolateSolution(pg, waypoint_count);
+
+            res.processing_time_.push_back(interpolate_time);
             res.description_.push_back("interpolate");
 
             ROS_DEBUG("%s: Returning successful solution with %lu states", getName().c_str(),
-                       simple_setup_->getSolutionPath().getStateCount());
+                       pg.getStateCount());
 
             res.trajectory_.resize(res.trajectory_.size() + 1);
             res.trajectory_.back().reset(new robot_trajectory::RobotTrajectory(getRobotModel(), getGroupName()));
-
 
             for (std::size_t i = 0 ; i < pg.getStateCount() ; ++i)
             {
@@ -568,6 +565,19 @@ bool GeometricPlanningContext::solve(double timeout, unsigned int count, double&
     postSolve();
 
     return result;
+}
+
+double GeometricPlanningContext::simplifySolution(double max_time)
+{
+    simple_setup_->simplifySolution(max_time);
+    return simple_setup_->getLastSimplificationTime();
+}
+
+double GeometricPlanningContext::interpolateSolution(ompl::geometric::PathGeometric &path, unsigned int waypoint_count)
+{
+    ompl::time::point start = ompl::time::now();
+    path.interpolate(waypoint_count);
+    return ompl::time::seconds(ompl::time::now() - start);
 }
 
 void GeometricPlanningContext::registerTerminationCondition(const ompl::base::PlannerTerminationCondition &ptc)

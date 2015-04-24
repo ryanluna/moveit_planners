@@ -94,6 +94,12 @@ public:
     ConstraintsLibraryPtr getConstraintsLibrary() const;
 
 protected:
+    /// \brief Simplify the solution path (in simple setup).  Use no more than max_time seconds.
+    virtual double simplifySolution(double max_time);
+
+    /// \brief Ensure that the given path has at least waypoint_count waypoints.
+    virtual double interpolateSolution(ompl::geometric::PathGeometric &path, unsigned int waypoint_count);
+
     /// \brief Definition of a PlannerAllocator function.  This function takes the OMPL SpaceInformation
     /// object, the new name of the planner (if any), and a map containing planner configuration items.
     typedef boost::function<ompl::base::PlannerPtr(const ompl::base::SpaceInformationPtr&, const std::string&,
